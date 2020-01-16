@@ -179,12 +179,12 @@ namespace WpfApp2
         public void Movebounce()
         {
             pt += dir;
-            if (pt.X > canvas.Width || pt.X < 0)
+            if (pt.X >= canvas.Width || pt.X < 0)
             {
                 dir.X = -dir.X;
             }
 
-            if (pt.Y > canvas.Height || pt.Y < 0)
+            if (pt.Y >= canvas.Height || pt.Y < 0)
             {
                 dir.Y = -dir.Y;
             }

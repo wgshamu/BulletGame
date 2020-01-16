@@ -18,26 +18,32 @@ namespace WpfApp2
     public class Thing
     {
         public Point pt;
+       public double diameter;
         public virtual void Move()
         {
 
         }
-    }
-    public class Enemy : Thing
+        public virtual void die(Canvas canvas)
+        {
+        }
+        }
+    public class Bullet : Thing
     {
-        
+
         SolidColorBrush color = new SolidColorBrush();
         double diameter;
         Canvas canvas = null;
         Ellipse circle;
-        
+       
         int pattern;
         Vector dir;
         double name;
         bool isdead;
-        public Enemy(Canvas canvas, Point pt, int pattern, SolidColorBrush color, double diameter, Vector dir, double name)
+
+        public Bullet(Canvas canvas, Point pt, int pattern, SolidColorBrush color, double diameter, Vector dir, double name)
 
         {
+
             this.diameter = diameter;
             this.color = color;
             this.canvas = canvas;
@@ -47,10 +53,11 @@ namespace WpfApp2
             this.name = name;
             circle = new Ellipse() { Fill = color, Width = diameter, Height = diameter };
             canvas.Children.Add(circle);
-            Canvas.SetLeft(circle, pt.X );
+            Canvas.SetLeft(circle, pt.X);
             Canvas.SetTop(circle, pt.Y);
+
         }
-        public void die(Canvas canvas)
+        public override void die(Canvas canvas)
         {
             canvas.Children.Remove(circle);
             MainWindow.diethings.Add(this);
@@ -96,9 +103,130 @@ namespace WpfApp2
         public void Movemultiple()
         {
             pt += (dir * name);
-            
+
             Canvas.SetLeft(circle, pt.X);
             Canvas.SetTop(circle, pt.Y);
+            if (pt.X > 1000 || pt.X < 0 || pt.Y > 1000 || pt.Y < 0)
+            {
+                isdead = true;
+            }
+        }
+        public void Movespin()
+        {
+
+        }
+        public void MoveLine()
+        {
+            Vector Dire = new Vector(name * Math.Cos(MainWindow.movehash / 6 * Math.PI / 180), name * Math.Sin(MainWindow.movehash / 6 * Math.PI / 180));
+
+
+            Canvas.SetLeft(circle, Dire.X + 500);
+            Canvas.SetTop(circle, Dire.Y + 500);
+
+        }
+        public override void Move()
+        {
+
+            if (pattern == 1)
+            {
+                Movebounce();
+            }
+            if (pattern == 2)
+            {
+                Movemultiple();
+            }
+            if (pattern == 3)
+            {
+                MoveLine();
+            }
+            if (pattern == 4)
+            {
+                MoveHome();
+            }
+            if (isdead)
+            {
+                die(canvas);
+            }
+        }
+    }
+        public class Enemy : Thing
+    {
+        
+        SolidColorBrush color = new SolidColorBrush();
+        public double size;
+        Canvas canvas = null;
+        Rectangle square;
+    
+        int pattern;
+        Vector dir;
+        double name;
+        bool isdead;
+        public Enemy(Canvas canvas, Point pt, int pattern, SolidColorBrush color, double size, Vector dir, double name)
+
+        {
+            
+            this.size = size;
+            diameter = size;
+            this.color = color;
+            this.canvas = canvas;
+            this.pt = pt;
+            this.pattern = pattern;
+            this.dir = dir;
+            this.name = name;
+            square = new Rectangle() { Fill = color, Width = size, Height = size };
+            canvas.Children.Add(square);
+            Canvas.SetLeft(square, pt.X );
+            Canvas.SetTop(square, pt.Y);
+        }
+        public override void die(Canvas canvas)
+        {
+            canvas.Children.Remove(square);
+            MainWindow.diethings.Add(this);
+        }
+        public void Movebounce()
+        {
+            pt += dir;
+            if (pt.X > canvas.Width || pt.X < 0)
+            {
+                dir.X = -dir.X;
+            }
+
+            if (pt.Y > canvas.Height || pt.Y < 0)
+            {
+                dir.Y = -dir.Y;
+            }
+
+            Canvas.SetLeft(square, pt.X);
+            Canvas.SetTop(square, pt.Y);
+        }
+        public void MoveHome()
+        {
+            Vector home = (pt - MainWindow.player.pt);
+            if (home.X > 0)
+            {
+                pt.X -= 10;
+            }
+            else
+                pt.X += 10;
+            if (home.Y > 0)
+            {
+                pt.Y -= 10;
+            }
+            else
+                pt.Y += 10;
+            Canvas.SetLeft(square, pt.X);
+            Canvas.SetTop(square, pt.Y);
+            if (pt.X > 1000 || pt.X < 0 || pt.Y > 1000 || pt.Y < 0)
+            {
+                isdead = true;
+            }
+        }
+        public void Movemultiple()
+        {
+            pt += (dir * name);
+            
+            Canvas.SetLeft(square, pt.X);
+            Canvas.SetTop(square, pt.Y);
             if (pt.X > 1000 || pt.X < 0 ||pt.Y > 1000 || pt.Y <0)
             {
                 isdead = true;
@@ -113,8 +241,8 @@ namespace WpfApp2
            Vector Dire =  new Vector(name * Math.Cos(MainWindow.movehash/6 * Math.PI / 180), name * Math.Sin(MainWindow.movehash/6 * Math.PI / 180));
             
           
-            Canvas.SetLeft(circle, Dire.X + 500);
-            Canvas.SetTop(circle, Dire.Y + 500);
+            Canvas.SetLeft(square, Dire.X + 500);
+            Canvas.SetTop(square, Dire.Y + 500);
 
         }
         public override void Move()
@@ -151,14 +279,16 @@ namespace WpfApp2
         double diameter;
         Canvas canvas = null;
         Ellipse circle;
-
+        bool PlayerBullet;
         int pattern;
         Vector dir;
         double name;
         bool isdead;
+         
         public Bomb(Canvas canvas, Point pt, int pattern, SolidColorBrush color, double diameter, Vector dir, double name)
 
         {
+            
             this.diameter = diameter;
             this.color = color;
             this.canvas = canvas;
@@ -170,8 +300,9 @@ namespace WpfApp2
             canvas.Children.Add(circle);
             Canvas.SetLeft(circle, pt.X);
             Canvas.SetTop(circle, pt.Y);
+           
         }
-        public void die(Canvas canvas)
+        public override void die(Canvas canvas)
         {
             canvas.Children.Remove(circle);
             MainWindow.diethings.Add(this);
@@ -288,14 +419,14 @@ namespace WpfApp2
             this.canvas = canvas;
             this.pt = pt;
             this.dir = dir;
-            for (int i = 0; i < 16; i++)
+      /*      for (int i = 0; i < 16; i++)
             {
                 Dead[i] = new BitmapImage(new Uri($"Sprites\\Dead ({i}).png", UriKind.Relative));
                 Idle[i] = new BitmapImage(new Uri($"Sprites\\Idle ({i}).png", UriKind.Relative));
                 Jump[i] = new BitmapImage(new Uri($"Sprites\\Jump ({i}).png", UriKind.Relative));
                 Walk[i] = new BitmapImage(new Uri($"Sprites\\Walk ({i}).png", UriKind.Relative));
                 Run[i] = new BitmapImage(new Uri($"C:\\Users\\Shamu\\source\\repos\\WpfApp1\\WpfApp1\\Sprites\\Sprites\\Run ({i}).png", UriKind.Relative));
-            }
+            } */
             mode = Run;
             circle = new Ellipse() { Fill = new SolidColorBrush(Colors.Red), Width = 50, Height = 50 };
             MainWindow.things.Add(this);
@@ -377,6 +508,11 @@ namespace WpfApp2
     /// </summary>
     public partial class MainWindow : Window
     {
+        public static double Collision1;
+        public static double Collision2;
+        public static int time = 0;
+        public static bool GameStart;
+        public static int phase;
         public static List<Thing> diethings = new List<Thing>();
        public static Player player;
         public static int movehash = 0;
@@ -387,7 +523,7 @@ namespace WpfApp2
         
         public MainWindow()
         {
-            InitializeComponent();
+                InitializeComponent();
             
             System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
             this.KeyDown += new KeyEventHandler(buttonkeydown);
@@ -406,17 +542,48 @@ namespace WpfApp2
 
         private void dispatcherTimer_Tick(object sender, EventArgs e)
         {
+            time++;
             if (movetrue)
                 movehash+=6;
-            
+            if (GameStart)
+            {
+                phaseCheck(phase);
+            }
             foreach (var thing in things)
             {
                 thing.Move();
 
             }
+            foreach (var PlayerBullet in things)
+            {
+                if (PlayerBullet is Bullet)
+                {
+                    Collision1 = PlayerBullet.pt.X;
+                    Collision2 = PlayerBullet.pt.Y;
+                    foreach (var Enemy in things)
+                    {
+                        if (Enemy is Enemy)
+                        {
+                            if (Collision1 >= Enemy.pt.X && Collision1 <= Enemy.pt.X + Enemy.diameter && Collision2 <= Enemy.pt.Y && Collision2 >= Enemy.pt.Y - Enemy.diameter)
+                            {
+                                Enemy.die(canvas);
+                            }
+                        }
+                    }
+                }
+            }
             foreach (var thing in diethings)
             {
                 things.Remove(thing);
+
+            }
+            foreach(var PlayerBullet in things)
+            {
+
+                foreach (var Enemy in things)
+                {
+
+                }
 
             }
            
@@ -435,12 +602,17 @@ namespace WpfApp2
 
         {
             keydictionary[e.Key] = e.IsDown;
+            if (e.Key == Key.Z)
+            {
+                things.Add(new Bullet(canvas, player.pt, 1, new SolidColorBrush(Colors.Black), 10.0, new Vector(10 * Math.Cos(270 * Math.PI/180), 10 * Math.Sin(270 * Math.PI/180)), 1));
+            }
 
-            
                 if (e.Key == Key.A)
             {
-
-            
+                
+                GameStart = true;
+                phase = 0;
+                time = 0;
             //makes a circle of dots at an interval of 1/10
             /*  for (int i = 0; i < 360; i += 36)
                {
@@ -448,11 +620,11 @@ namespace WpfApp2
                }
               */ movetrue = true;
                // makes a circle of dots that desync slightly from an interval of 1/10
-               for (int i = 0; i < 360; i += 36)
-               {
-                   int x = i + movehash;
-                   things.Add(new Bomb(canvas, new Point(500, 500), 1, new SolidColorBrush(Colors.Red), 10.0, new Vector(10 * Math.Cos(x * Math.PI / 180), 10 * Math.Sin(x * Math.PI / 180)), 1));
-               } 
+             //  for (int i = 0; i < 360; i += 36)
+            //   {
+             //      int x = i + movehash;
+            //       things.Add(new Bomb(canvas, new Point(500, 500), 1, new SolidColorBrush(Colors.Red), 10.0, new Vector(10 * Math.Cos(x * Math.PI / 180), 10 * Math.Sin(x * Math.PI / 180)), 1));
+            //   } 
 
              //makes a line of dots
            
@@ -472,6 +644,36 @@ namespace WpfApp2
                 {
                     things.Add(new Bomb(canvas, new Point(500, 500), 4, new SolidColorBrush(Colors.Black), 10.0, new Vector(10 * Math.Cos(i * Math.PI / 180), 10 * Math.Sin(i * Math.PI / 180)), 1));
                 } */ 
+            }
+        }
+       public void phaseCheck(int phase)
+        {
+            
+            switch (phase)
+            {
+                case 0:
+                    if (time == 10)
+                    {
+                        MainWindow.phase = 1;
+                        time = 0;
+                    }
+                    break;
+                case 1:
+                    if (time == 10)
+                    {
+                        for (int i = 0; i < 360; i += 36)
+                        {
+                            things.Add(new Enemy(canvas, new Point(0, 0), 2, new SolidColorBrush(Colors.Black), 30.0, new Vector(Math.Cos(time * Math.PI / 180), Math.Sin(time * Math.PI / 180)), 1.3));
+                        }
+
+                    }
+                    if (time == 120 )
+                    {
+                        phase = 2;
+                        time = 0;
+                    }
+                    break;
+                    
             }
         }
     }
